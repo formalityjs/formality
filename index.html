@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+	<title>Formality</title>
+	
+	<link rel="stylesheet" href="ivartech-bootstrap.css">
+	
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="ivartech/main.js"></script>
+	<script type="text/javascript" src="formality.js"></script>
+	
+</head>
+<body>
+	<div id="container">
+		<div id="main" class="clearfix"><!-- main start -->
+			<form class="login">
+				<input id="test" type="text" class="ivartech-input" label="Test:" data_type="integer" min="3" max="6" valid_msg="Bravo fegetu!" error_msg="Unos mora imati od 3 do 6 karaktera moronu!" tip_msg="Neka informacija" minexclusive="true" default_state="warn" />
+
+				<input id="email" name="email" type="text" class="ivartech-input" label="E-mail:" form="login" mandatory="true" format="email" min="6" />
+				<input id="password" name="password" type="password" class="ivartech-input" label="Password:" form="login" mandatory="true"/>
+				
+				<input type="checkbox" name="vehicle" value="Car"><label for="vehicle">I have a car</label>
+				<select name="select">
+				  <option value="value1">Value 1</option> 
+				  <option value="value2" selected>Value 2</option>
+				  <option value="value3">Value 3</option>
+				</select>
+				<hr />
+				<select name="select2" multiple>
+				 	<option value="value1">Value 1</option> 
+					<option value="value2" selected>Value 2</option>
+					<option value="value3">Value 3</option>
+				</select>
+				<div class="captcha clearfix">
+					<div class="captcha-wrapper">
+							<img class="image" src="Pages/captchino/captchino.php" />	
+					</div>
+					<input type="text" name="captcha" id="captcha" class="ivartech-input" label="Text from image: " form="login" regex="^[a-z0-9]{5}$ i" error_msg="Captcha is consisted out of 5 alphanumerical characters. Case insensitive." mandatory="true" />
+				</div>
+				<a id="register" class="button"><i></i><span>Register</span></a>
+				<a id="login" class="button"><i></i><span>Login</span></a>
+			</form>
+		</div><!-- main end -->
+
+	</div><!-- end of #container -->
+	<div id="ivartech-templates" style="display:none;">
+		<div class="input-field">
+			<label class="input-label" for=""></label> 
+			<input id="input-field-template" name="" type="text" />
+			<span class="input-info">
+				<i class="i16 error" title="" >&times;</i>
+				<i class="i16 valid" title="" >&#x2713;</i>
+				<i class="i16 info" title="" >i</i>
+				<i class="i16 warn" title="" >!</i>
+				<i class="i16 tip" title="" >?</i>
+				<i class="i16 load" title="" ></i>
+				<span class="message"></span>
+			</span>
+		</div>
+	</div>
+</body>
+</html>
