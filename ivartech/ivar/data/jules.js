@@ -227,7 +227,8 @@ jules.validator.forbidden = function(value, i, schema) {
 
 jules.validator.type = function(value, i, schema) {
 	var type = schema[i];
-	if(type === 'any' || type === '*' || type === '')
+	
+	if(/^\s*(any|\*|\s|^$)\s*$/i.test(type))
 		return true;
 		
 	if(ivar.isArray(type)) {
@@ -620,9 +621,11 @@ jules.formats.email = function(value) {
 };
 
 jules.formats.regex = function(value) {
-	if(!value.toRegExp())
-		return false;
-	return true;
+	return !value.toRegExp() ? false : true;
+};
+
+jules.formats.json = function(value) {
+	return !value.parseJSON() ? false : true;
 };
 
 jules.formats.time = function(value) {

@@ -121,8 +121,6 @@ InputField.prototype.update = function() {
 
 InputField.prototype.validate = function() {
 	this.update();
-	console.log(this.value);
-	console.log(jules.validator.type('string', 'type', this.schema));
 	if(!jules.validator.type('string', 'type', this.schema))
 		this.value = ivar.parseText(this.value);
 	return jules.validate(this.value, this.schema);
@@ -230,14 +228,7 @@ function initInputs(elems) {
 			if(ifield.type === 'text' || ifield.type === 'textarea')
 			ifield.schema.type = 'string';
 		}
-		
-		for (var j = 0; j < stored.length; j++) {
-			elems[i].removeAttribute(stored[j]);
-		}
-		
-		
-		
-		
+
 		if(tmp.prop('tagName').toLowerCase() === 'textarea')
 			template.addClass('textarea');
 		
@@ -282,6 +273,10 @@ function initInputs(elems) {
 			fieldFocus(this, e);
 		});
 		
+		for (var j = 0; j < stored.length; j++) {
+			elems[i].removeAttribute(stored[j]);
+		}
+		
 		$(elems[i]).replaceWith(template);
 	}
 };
@@ -294,7 +289,6 @@ function fieldFocus(elem, e) {
 
 function fieldBlur(elem, e) {
 	var ifield = $(elem).data('ivartech-input');
-	console.log(ifield.schema);
 	if(!ifield.skip_validation)
 		if(ifield.validate()) {
 			if(!ifield.mandatory && ifield.field.val().length === 0 ) {

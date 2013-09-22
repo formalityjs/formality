@@ -20,7 +20,7 @@
 				<input id="test" type="text" class="ivartech-input" label="Test:" data_type="integer" min="3" max="6" valid_msg="Bravo fegetu!" error_msg="Unos mora imati od 3 do 6 karaktera moronu!" tip_msg="Neka informacija" minexclusive="true" default_state="warn" />
 
 				<input id="email" name="email" type="text" class="ivartech-input" label="E-mail:" form="login" mandatory="true" format="email" min="6" />
-				<input id="password" name="password" type="password" class="ivartech-input" label="Password:" form="login" mandatory="true"/>
+				<input id="password" name="password" type="password" class="ivartech-input" label="Password:" form="login" mandatory="true" min="6" function="testPassword"/>
 				
 				<input type="checkbox" name="vehicle" value="Car"><label for="vehicle">I have a car</label>
 				<select name="select">
