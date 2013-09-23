@@ -1,2 +1,2 @@
-require('ivar.test.a');
-require('ivar.test.b');
+ivar.require('ivar.test.a');
+ivar.require('ivar.test.b');

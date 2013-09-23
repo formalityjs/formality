@@ -1,5 +1,3 @@
-/** * Eric Meyer's Reset CSS v2.0 (http://meyerweb.com/eric/tools/css/reset/) * http://cssreset.com */html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td,article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,time, mark, audio, video {	margin: 0;	padding: 0;	border: 0;	font-size: 100%;	font: inherit;	vertical-align: baseline;}/* HTML5 display-role reset for older browsers */article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {	display: block;}body {	line-height: 1;}ol, ul {	list-style: none;}blockquote, q {	quotes: none;}blockquote:before, blockquote:after,q:before, q:after {	content: '';	content: none;}table {	border-collapse: collapse;	border-spacing: 0;}
-
 /*
  *	IVARTECH-BOOTSTRAP CSS
  *	in combination with ivatech-bootstrap.js and jquery should give an easy to 
@@ -31,24 +29,15 @@
  */
  
 body {
-	color: #333;
-	font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-	font-size: 14px;
+	font-family: Helvetica, Arial, sans-serif;
+	color: #1b1b1b;
+	background: #fff;
 }
-
-a {
-	color: #007eff;
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-i {
-	vertical-align: middle;
-	display: inline-block;
-}
+ 
+ i {
+ 	display: inline-block;
+	vertical-align: text-top;
+ }
 
 .i8 {
 	width: 8px;
@@ -80,14 +69,8 @@ i {
 	line-height: 32px;
 }
 
-hr {
-	border: none;
-	border-top: solid 1px #f1f1f1;
-	margin: 20px 0;
-}
-
 .input-field {
-	padding-bottom: 10px;
+	padding-bottom: 2px;
 	margin-left: 10px;
 	line-height: 25px;
 }
@@ -99,17 +82,19 @@ hr {
 
 label {
 	display: inline-block;
-	width: 90px;
 	vertical-align: middle;
 	color: #555;
+	width: 100px;
 }
 
 input[type="text"],input[type="password"],textarea {
 	outline: none;
 	border: solid 1px #ccc;
 	padding: 4px 5px;
-	width: 145px;
+	width: 150px;
 	height: 16px;
+	border-radius: 2px;	
+	-moz-border-radius: 2px;
 }
 
 textarea {
@@ -141,27 +126,56 @@ input[type="text"]:focus,input[type="password"]:focus, textarea:focus {
 	border: solid 1px #c40000;
 }
 
-.button {
+.button-wrapper .button {
 	display: inline-block;
 	cursor: pointer;
 	text-align: center;
 	padding: 5px 10px;
 	border: 1px solid #007eff;
 	background: #007eff;
-	font-size: 18px;
+	font-size: 16px;
 	color: #fff;
+	border-radius: 3px;	
+	-moz-border-radius: 3px;
+	margin-top: 10px;
 }
 
-.button:hover {
+.button-wrapper .button:hover {
 	border-color: #3197ff;
 	background: #3197ff;
 	text-decoration: none;
 }
 
-.button:active {
+.button-wrapper .button:active {
 	border-color: #fff;
 	background: #0067d1;
 	text-decoration: none;
+}
+
+.button-wrapper.load .button {
+	display: inline-block;
+	cursor: pointer;
+	text-align: center;
+	padding: 5px 10px;
+	border: 1px solid #efefef;
+	background: #efefef;
+	font-size: 16px;
+	color: #666;
+	border-radius: 3px;	
+	-moz-border-radius: 3px;
+	margin-top: 10px;
+}
+
+.button-wrapper.load .button:hover {
+	
+}
+
+.button-wrapper.load .button:active {
+	
+}
+
+.button-wrapper {
+	padding-left: 10px;
 }
 
 .input-info {
@@ -220,7 +234,7 @@ input[type="text"]:focus,input[type="password"]:focus, textarea:focus {
 }
 
 .input-info i.load {
-	background: #fff url(style-images/input-loader.gif) no-repeat center center;
+	background: #fff url(style-images/loader-micro.gif) no-repeat center center;
 }
 
 .load .input-info i.load {
@@ -249,4 +263,22 @@ input[type="text"]:focus,input[type="password"]:focus, textarea:focus {
 
 .warn .input-info i.warn {
 	display: inline-block;
+}
+
+.captcha .captcha-wrapper {
+	float: left;
+}
+
+.captcha .captcha-wrapper img {
+	cursor: pointer;
+}
+
+.captcha .input-field {
+	float: left;
+	width: 122px;
+}
+
+.captcha .input-field input {
+	display: inline-block;
+	width: 80px;
 }

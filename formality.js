@@ -15,14 +15,16 @@
 
 //states: default, info, warn, error, load, disabled, tip, valid/ok
 
+//TODO: BUTTON STATES, LOADING, ERROR, SUCCESS
+//TODO: CAPTCHA WIDGET
+//TODO: FORM SUBMISSION
 
+if (ivar === undefined) var ivar = {};
 
 ivar.namespace('formality');
 formality.formAggregator = {};
 
-ivar.require('ivar.data.jules');
-
-ivar.ready(function() {
+$(document).ready(function() {
 	//console.log(jules.validate('lol',{type: 'string'}));
 	initInputs($('.ivartech-input'));
 });
@@ -119,9 +121,14 @@ InputField.prototype.update = function() {
 	this.value = value.update[this.type](this.field);
 };
 
+InputField.prototype.clear = function() {
+	this.value = null;
+	$(this.field).val('');
+};
+
 InputField.prototype.validate = function() {
 	this.update();
-	if(!jules.validator.type('string', 'type', this.schema))
+	if(!jules.validator.type('string', 'type', this.schema)) //??? kako ovo uopšte radi....stamate konju
 		this.value = ivar.parseText(this.value);
 	return jules.validate(this.value, this.schema);
 };
@@ -162,17 +169,22 @@ store.attr.maxexclusive = function(o, v) {
 	store.setRange('max', 'exclusive', o, v);
 };
 
+//TODO: for numbers and for strings
 store.attr.regex = function(o, v) {
-	if(jules.validator.type('string', 'type', o.schema)) {
+	//if(jules.validator.type('string', 'type', o.schema)) {
 		o.schema.pattern = v;
-	} else if(jules.validator.type('integer', 'type', o.schema) || 
-		jules.validator.type('number', 'type', o.schema)) {
-		o.schema.numberPattern = v;
-	}
+	//} else if(jules.validator.type('integer', 'type', o.schema) || 
+	//	jules.validator.type('number', 'type', o.schema)) {
+	//	o.schema.numberPattern = v;
+	//}
 };
 
 store.attr.format = function(o, v) {
 	o.schema.format = v;
+};
+
+store.attr.name = function(o, v) {
+	o.name = v;
 };
 
 store.attr.form = function(o, v) {
@@ -299,4 +311,70 @@ function fieldBlur(elem, e) {
 		} else {
 			ifield.setState('error');
 		}
+}
+
+
+//reverts all fields to prevous states
+formality.revertStates = function(form_name) {
+	var elems = formality.formAggregator[form_name];
+
+	for(var i = 0; i < elems.length; i++) {
+		elems[i].setDefaultState();
+	}
+}
+
+//Collects all field values and pacs them in json name:value
+//TODO: collect other input fields than input and textbox
+formality.collect = function(form_name) {
+	var elems = formality.formAggregator[form_name];
+	var res = {};
+	
+	for(var i = 0; i < elems.length; i++) {
+		res[elems[i].name] = elems[i].value;
+	}
+	return res;
+}
+
+//Clear all values of all fields
+formality.clearFields = function(form_name) {
+	var elems = formality.formAggregator[form_name];
+
+	for(var i = 0; i < elems.length; i++) {
+		elems[i].clear();
+	}
+}
+
+//Clear all values of all fields
+formality.isFormValid = function(form_name) {
+	var elems = formality.formAggregator[form_name];
+	
+	for(var i = 0; i < elems.length; i++) {
+		if(!elems[i].validate())
+			return false;
+	}
+	
+	return true;
+}
+
+formality.validateForm = function(form_name) {
+	var elems = formality.formAggregator[form_name];
+	var res = true;
+	for(var i = 0; i < elems.length; i++) {
+		if(!elems[i].validate()) {
+			if(res) res = false;
+			elems[i].setState('error');
+		}
+	}
+	
+	return res;
+}
+
+//Get a certain field in a certain form
+formality.getField = function(form_name, field_name) {
+	var elems = formality.formAggregator[form_name];
+
+	for(var i = 0; i < elems.length; i++) {
+		if (elems[i].name === field_name)
+			return elems[i];
+	}
 }

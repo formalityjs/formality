@@ -21,12 +21,12 @@ ivar.data.Graph.prototype.Link.prototype.getTarget = function(key) {
 	if(this.__nodes__.length > 1) { //bothways
 		var res = [];
 		for (var i = 0; i < this.__nodes__.length; i++) {
-			if (this.__nodes__[i].__uid__ != key) {
+			if (this.__nodes__[i].__uid__ !== key) {
 				res.push(this.__nodes__[i]);
 			}
 		}
 		if(res.length == 1)
-			return res[0];
+			res = res[0];
 		return res;
 	} else { //oneway, can target self or other node
 		return this.__nodes__[0];

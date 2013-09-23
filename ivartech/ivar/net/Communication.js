@@ -6,6 +6,20 @@
  *	
  *	@namespace	ivar.net
  */
+ 
+//TODO: PROBLEM!!! Response order!
+/*
+	Let's say we have two same procedure calls on server, first one takes a bit longer to complete, but the second one takes shorter time to load. First response is the one of the second call, and last is the one of the first call. So the last response becomes relevant, but it is not the information up to date.
+	
+	The solutions to this is to stack calls and wait for responses in order. This has to be modeled carefully.
+	Or to assign a custom callback to each call.
+*/
+
+//TODO: METHOD EXECUTION PROPERTIES (like: only once(the result is always same), one by one (stack methods, if the response isnt received, dont execute the others), abort). com.register(method, property);
+// What about encapsulating, or making pseudonims for methods with different params! :) This can be valuable.
+//TODO: METHOD WAITTING STACK
+//TODO: Should requests be uniquely signed by request object they contain with CRC32
+// If prevous, then there should be a mechanism that stores the data of requests if the result expected is the same
 
 //TODO: Finis file upload, purge jquery form the script
 
@@ -39,25 +53,26 @@ ivar.namespace('ivar.net');
  *	@property	{string}	defaults.method='GET'
  *	@property	{string}	defaults.content_type='application/json'
  *	@property	{boolean}	history
- *	@property	{Events}	events
  */
 ivar.net.Communication = function Communication(options, history) {
 	this.registered = new ivar.data.Map();
+	this.pending = new ivar.data.Map();
 	this.sent = new ivar.data.Map();
+//	this.pending = new ivar.data.Map();
 	this.unsuccessful = new ivar.data.Map();
 	this.received = new ivar.data.Map();
+//	this.abort = false;
 	this.defaults = {
 		async: true,
 		method: 'GET',
 		content_type: 'application/json'
 	};
 	this.history = false;
-	if(isSet(history))
+	if(ivar.isSet(history))
 		this.history = history;
 		
 	this.applyOptions(options);
 	
-	//this.events = new ivar.patt.Events();
 	new ivar.patt.Events(this);
 };
 
@@ -99,7 +114,7 @@ ivar.net.Communication.prototype.applyOptions = function(options) {
  *	@param 	{string|number}	[obj.request.id] 		Request UID string if not supplied it is automatically generated
  *	@param 	{string}		obj.request.method 		Name of the method to be invoked on server 
  *	@param 	{object}		obj.request.params		Request data to be submitted to method on server as its parameters
- *	@param 	{string}		obj.url					URL of server side interface
+ *	@param 	{string}		obj.uri					URI of server side interface
  *	@param	{boolean}		[obj.async=true]		Should a request be asynchronous or not
  *	@param	{string}		[obj.method='GET']		HTTP method GET, POST, PUT, DELETE
  *	@param	{string}		[obj.content_type='application/json']	Content MIME type json|rest|xml| image|file...
@@ -114,17 +129,19 @@ ivar.net.Communication.prototype.register = function(obj) {
 			}
 		};
 	if(!this.registered.hasKey(obj.request.method)) {
-		this[obj.request.method] = function(params) {
+		this[obj.request.method] = function(params, callback) {
 			var requestObject = this.registered.get(obj.request.method);
 			if (ivar.isSet(params))
 				requestObject.request.params = params;
+			if (ivar.isSet(callback))
+				requestObject.callback = callback;
 			this.send(requestObject, obj.request.method);
 		};
 	}
-	this.registered.put(obj.request.method, ivar.extend(this.defaults, obj, 0));
+	this.registered.put(obj.request.method, ivar.extend(ivar.clone(this.defaults), obj));
 };
 
-/**true
+/**
  *	Removes already registered function so it can't be called anymore
  *
  *	@param	{string}	method_name
@@ -144,7 +161,7 @@ ivar.net.Communication.prototype.unregister = function(method_name) {
  *	@param 	{string|number}	[options.request.id] 		Request UID string if not supplied it is automatically generated
  *	@param 	{string}		options.request.method 		Name of the method to be invoked on server 
  *	@param 	{object}		options.request.params		Request data to be submitted to method on server as its parameters
- *	@param 	{string}		options.url					URL of server side interface
+ *	@param 	{string}		options.uri					URI of server side interface
  *	@param	{boolean}		[options.async=true]		Should a request be asynchronous or not
  *	@param	{string}		[options.method='GET']		HTTP method GET, POST, PUT, DELETE
  *	@param	{string}		[options.content_type='application/json']	Content MIME type json|rest|xml| image|file...
@@ -154,28 +171,49 @@ ivar.net.Communication.prototype.unregister = function(method_name) {
  *	@return	{boolean}									If sending is successful or not	
  */
 ivar.net.Communication.prototype.send = function(options) {
-	var obj = ivar.extend(this.defaults, options, 0);
+	var obj = ivar.extend(ivar.clone(this.defaults), options);
 	
-	if (!ivar.isSet(obj.url) || !ivar.isSet(obj.request) || !ivar.isSet(obj.request.method)) {
+	if (!ivar.isSet(obj.uri) || !ivar.isSet(obj.request) || !ivar.isSet(obj.request.method)) {
 		return this.failed(obj, 'URL or Request object, or request method is not set! Check your request object!', false);
 	}
 	
-	if (!isSet(obj.request.id))
+//	if(this.abort) {
+//		var pending = this.pending.get(obj.request.method);
+//	
+//		if(ivar.isSet(pending)) {
+//			pending.abort();
+//			this.pending.remove(obj.request.method);
+//		}
+//	}
+	
+	if (!ivar.isSet(obj.request.id))
 		obj.request.id = ivar.uid();
 	
-	if (!isSet(obj.request.params))
+	if (!ivar.isSet(obj.request.params))
 		obj.request.params = {};
-
-	var request = new XMLHttpRequest();
+	
 	try {
-		request.open(obj.method, obj.url, obj.async, obj.user, obj.password);
-	} catch (e) {
+		var json;
+		if(ivar.isSet(obj.request))
+			json = JSON.stringify(obj.request);
+	} catch(e) {
 		return this.failed(obj, e);
 	}
-	request.setRequestHeader('Content-Type', obj.content_type);
+	
+	var opt = {
+		'method': obj.method,
+		'uri': obj.uri,
+		'async': obj.async,
+		'user': obj.user,
+		'password': obj.password,
+		'message': json,
+		'header': {
+			'Content-Type': obj.content_type
+		}
+	}
 	
 	var self = this;
-	request.onload = function() {
+	function onreceive(request, e) {
 		self.receive({
 			status: request.status,
 			date: request.getResponseHeader('Date'),
@@ -184,17 +222,15 @@ ivar.net.Communication.prototype.send = function(options) {
 			id: obj.request.id
 		});
 	};
-	try {
-		var json;
-		if(isSet(obj.request))
-			json = JSON.stringify(obj.request);
-		request.send(json);
-	} catch(e) {
-		return this.failed(obj, e);
-	}
 	
+	var request = ivar.request(opt, onreceive);
+	
+	if(!ivar.isSet(request))
+		return this.failed(obj, e);
+	
+//	if(this.abort) this.pending.put(obj.request.method, request);
 	this.sent.put(obj.request.id, obj);
-	ivar.print('[request]: '+ obj.request.method, obj);
+	ivar.echo('[request]: '+ obj.request.method, obj);
 	this.fire(obj.request.method+'-send', obj);
 	this.fire('send', obj);
 	return true;
@@ -212,61 +248,60 @@ ivar.net.Communication.prototype.send = function(options) {
  *	@param 	{string|number}	obj.id 				Identificator of the request object
  */
 ivar.net.Communication.prototype.receive = function(obj) {
-	var sentObj = this.sent.get(obj.id);
+	var requ = this.sent.get(obj.id);
 	var status = ivar.net.httpResponseStatus(obj.status);
 	
 	if (status.type === 2) {
 		if (status.code !== 200)
-			ivar.warning(sentObj.request.method +' - '+sentObj.method + ' ' + sentObj.url + ' ' + status.code + ' ' + '(' + status.codeTitle + ')');
-		var resp = obj.response_text;
-		var jsonBegin = resp.indexOf('{');
+			ivar.warn(requ.request.method +' - '+requ.method + ' ' + requ.url + ' ' + status.code + ' ' + '(' + status.codeTitle + ')');
+		var response_text = obj.response_text;
+		var jsonBegin = response_text.indexOf('{');
 		var serverWarning;
 		if(jsonBegin > 0) {
-			serverWarning = resp.substring(0, jsonBegin);
-			resp = resp.substring(jsonBegin, resp.lastIndexOf('}') + 1);
+			serverWarning = response_text.substring(0, jsonBegin);
+			response_text = response_text.substring(jsonBegin, response_text.lastIndexOf('}') + 1);
 		} else if (jsonBegin === -1) {
-			ivar.error('[server-error]: '+resp);
+			ivar.error('[server-error]: '+response_text);
 		}
 
 		if (ivar.isSet(serverWarning) && (serverWarning !== ''))
-			ivar.warning('[server-warning]: '+sentObj.request.method, serverWarning);
+			ivar.warn('[server-warning]: '+requ.request.method, serverWarning);
 		
 		//TODO: Parse response_text to JSON depending on response_type
-		var json;
+		var resp;
 		try {
-			json = JSON.parse(resp);
+			resp = JSON.parse(response_text);
 		} catch (e) {
-			this.failed(sentObj, ''+e+' > ' + resp );
+			this.failed(requ, ''+e+' > ' + response_text );
  		}
  		
- 		if (ivar.isSet(json)) {
- 			try {
- 				//TODO: Check formats for other browsers print(obj.date);
- 				if(isSet(obj.date))
-					json['date'] = new Date(obj.date);
-			} catch (e) {
-	 			error(e);
-	 		}
+ 		if (ivar.isSet(resp)) {
+ 			if(ivar.isSet(obj.date))
+	 			try {
+	 				//TODO: Check formats for other browsers ivar.echo(obj.date);
+						resp['date'] = new Date(obj.date);
+				} catch (e) {
+		 			ivar.error(e);
+		 		}
 	 		
-			this.fire(sentObj.request.method+'-receive', sentObj, json);
-			this.fire('receive', sentObj, json);
+	 		if (ivar.isSet(requ.callback)) requ.callback(requ, resp);
+	 		
+			this.fire(requ.request.method+'-receive', requ, resp);
+			this.fire('receive', requ, resp);
 			
-			if(this.unsuccessful.hasKey(json.id))
-				this.unsuccessful.remove(json.id);
-				
-			if (isSet(sentObj.callback))
-				sentObj.callback(json);
+			if(this.unsuccessful.hasKey(resp.id))
+				this.unsuccessful.remove(resp.id);
 			
 			if (this.history) {
-				this.received.put(json.id, json);
+				this.received.put(resp.id, resp);
 			} else {
-				this.sent.remove(json.id);
+				this.sent.remove(resp.id);
 			}
 			
-			ivar.print('[response]: '+ sentObj.request.method, json);
+			ivar.echo('[response]: '+ requ.request.method, resp);
 		}
 	} else {
-		this.failed(sentObj, sentObj.request.method +' - '+sentObj.method + ' ' + sentObj.url + ' ' + status.code + ' ' + '(' + status.codeTitle + ')');
+		this.failed(requ, requ.request.method +' - '+requ.method + ' ' + requ.url + ' ' + status.code + ' ' + '(' + status.codeTitle + ')');
 	}
 };
 
@@ -401,12 +436,13 @@ ivar.net.html5Upload = function(file, url, callback) {
 	var request = new XMLHttpRequest();
 	request.open('POST', url, true);
 	request.onload = function() {
-		print(request.responseText);
+		//ivar.echo(request.responseText);
+		var value;
 		if (request.status == 200) {
 			try {
  				value = JSON.parse(request.responseText);
 	 		} catch (e) {
-	 			error(e);
+	 			ivar.error(e);
 	 		}
 			callback(value);
 		}

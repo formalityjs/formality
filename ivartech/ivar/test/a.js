@@ -1,6 +1,7 @@
-require('ivar.test.b');
+ivar.require('ivar.test.b');
 var a = 'zomg!';
 
-ready(function(){
-	print(b);
+ivar.ready(function(){
+	console.log('a');
+	ivar.echo(b);
 });

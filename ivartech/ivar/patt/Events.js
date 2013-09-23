@@ -97,7 +97,7 @@ ivar.patt.Events.prototype.unbind = function(event_name, func) {
 		return;
 	}
 	
-	if(isArray(event_name)) {
+	if(ivar.isArray(event_name)) {
 		var multi_event_name = this.multi_nameGen(event_name);
 		this.multi_unbind(event_name, multi_event_name);
 		event_name = multi_event_name;
@@ -115,7 +115,7 @@ ivar.patt.Events.prototype.unbind = function(event_name, func) {
 			}
 		}
 	}
-	if (isSet(arr) && (arr.length == 0))
+	if (ivar.isSet(arr) && (arr.length == 0))
 		this.clearBound(event_name);
 };
 
@@ -211,7 +211,7 @@ ivar.patt.Events.prototype.fire = function(event_name) {
 			} 
 		});
 	
-	if (!isArray(event_name))
+	if (!ivar.isArray(event_name))
 		this.multi_singleEventFied(event_name);
 		
 	if (arrayOfEventNames.length > 0)
