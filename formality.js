@@ -22,9 +22,12 @@
 if (ivar === undefined) var ivar = {};
 
 ivar.namespace('formality');
+
+ivar.require('ivar.data.jules');
+
 formality.formAggregator = {};
 
-$(document).ready(function() {
+ivar.ready(function() {
 	//console.log(jules.validate('lol',{type: 'string'}));
 	initInputs($('.ivartech-input'));
 });
